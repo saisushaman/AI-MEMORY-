@@ -1,113 +1,147 @@
-# Initial Research Gap Analysis (Phase 1 output)
+# Research Gap → Opportunity Map (Phase 1 output)
 
-**Purpose:** an honest, evidence-grounded assessment of whether the original hypothesis is novel, where the real gap is, and what a defensible contribution could look like. This is *not* the final research proposal (that is Phase 4, after the formal novelty matrix in Phase 2).
+**Purpose:** turn the literature findings into *useful, buildable, top-tier-viable* research directions. For each: what's genuinely new, the exact prior work it must beat and *how*, the claim to prove, the decisive experiment, the risk, and venue fit. Evidence lives in [`literature_review.md`](literature_review.md) / [`literature_matrix.csv`](literature_matrix.csv).
 
-**Bottom line up front:** the original hypothesis, *as stated*, is **largely not novel**. Each of its pillars is precedented — several in real 2025 systems — and its token-budgeted-selection core is already formalized (AdaGReS 2025; Lin–Bilmes 2011). A publishable contribution must move from "we combine these features" to a **specific mechanism + measurement** that no prior work provides. The most defensible whitespace is the **joint optimization of storage-side semantic duplication and context-side token cost over one shared canonical-unit store, with a metric suite that actually measures duplication and reuse.**
+**Frame:** the original hypothesis's *pillars* are precedented — so we stop treating "canonical units + multi-view + budgeted selection" as the contribution and instead compete on **mechanism, guarantee, and measurement**. Below, the same raw ingredients are re-pointed at four angles where the field is actually thin. Each is written so you can decide *fast* whether it's worth building.
 
 ---
 
-## 1. What has already been done? (mapped to the original claims)
+## The one-paragraph reframe
 
-The original hypothesis has five implicit claims. Verdict on each (evidence in [`literature_review.md`](literature_review.md) / [`literature_matrix.csv`](literature_matrix.csv)):
+Every existing memory system treats the **store** and the **per-query context** as two separate problems: dedup/consolidation happens *in* the store (SemDeDup, Zep, LightMem, Mem0), and token-budgeted selection happens *at query time over a fixed store* (AdaGReS, RECOMP, Provence). **No one makes the canonical store itself the decision variable that is optimized against the distribution of future queries and views.** That single shift — *co-designing what you store with how you'll compose it* — is the thread that runs through all four directions below and is where the defensible novelty lives.
 
-| Claim | Verdict | Key precedents |
+---
+
+## Precedent map (compressed — so we differentiate precisely, not vaguely)
+
+| Ingredient | Best prior art | The precise thing it does **not** do |
 |---|---|---|
-| "Information can be represented as canonical, reusable memory units" | **Done** | A-MEM (linked notes), AWM (workflows), Voyager (skills), Mem0 (facts), Gist/xRAG (cached compressed units) |
-| "…shared across multiple task-specific memory views" | **Done** | MIRIX (6 typed views), Collaborative Memory (per-user *transformed views* over shared fragments), MemGAS (granularity views), PerLTQA (typed) |
-| "A query-aware memory controller dynamically selects…" | **Done** | MemGAS (entropy router), Adaptive-RAG (complexity router), Self-RAG, Provence |
-| "…the smallest sufficient set of memory units under a token budget" | **Done / formalized** | **AdaGReS** (budget-constrained relevance−redundancy greedy + submodular guarantee), **Lin–Bilmes 2011** (budgeted submodular coverage−redundancy), Cost-Aware Evidence Selection, Adaptive-k |
-| "…reducing context token usage and memory duplication while maintaining task performance" | **Partially done** | Token reduction is heavily demonstrated (Mem0 >90%, LightMem up to 38×, MIRIX 99.9% storage, RecMem 87%). *Duplication reduction is asserted implicitly via consolidation; almost never measured as a first-class metric.* |
+| Budgeted redundancy-aware selection | **AdaGReS** (2512.25052) | Optimizes *per query over a fixed corpus of RAG chunks*; never redesigns the store; no typed units; embedding relevance, not task utility |
+| Multi-view typed memory | **MIRIX** (2507.07957) | Stores views as *independent* typed memories → the same fact is duplicated across types; no shared canonical unit; no budget objective |
+| Shared units + views + reuse | **Collaborative Memory** (2505.18279) | Views come from *access policy*, not query/task semantics; not about dedup or token budget |
+| Semantic dedup | **SemDeDup** (2303.09540) | Training-data only; destructive; no views, no query-time composition, no provenance |
+| Store-side consolidation | Zep / LightMem / Mem0 | Entity/fact merging or LLM fusion, but **duplication is never measured** and store isn't optimized w.r.t. query distribution |
 
-**Consequence:** a reviewer can point to a single prior paper for every pillar. The bundle is not itself a contribution.
-
----
-
-## 2. What is the closest prior work?
-
-Four systems/papers are close enough that the paper must explicitly differentiate from them:
-
-1. **AdaGReS** (arXiv:2512.25052, 2025) — *closest on the optimization core.* Already does token-budgeted greedy selection maximizing relevance minus intra-set redundancy, with adaptive trade-off calibration and ε-submodular near-optimality guarantees. **This nearly pre-empts "token-budgeted selection of a non-redundant sufficient set" as a standalone contribution.** Differences we can exploit: it operates on *RAG chunks*, uses *embedding relevance* (not measured task utility), has *no persistent memory store*, *no deduplication of the store*, and *no multi-view typing*.
-2. **MIRIX** (arXiv:2507.07957, 2025) — *closest on multi-view.* Six typed memory components with a coordinating controller and 99.9% storage reduction. Differences: typing is fixed and hand-designed; no explicit semantic dedup into canonical units; no budget-constrained composition objective; storage reduction is reported but duplication is not measured.
-3. **Collaborative Memory** (arXiv:2505.18279, 2025) — *closest on shared units + views + cross-context reuse.* Shared fragments projected into per-user *transformed views* under access policies, enabling cross-user reuse. Differences: views come from *access control*, not task/query semantics; dedup and token-budget composition are not the focus.
-4. **Zep / Graphiti** (arXiv:2501.13956, 2025) — *closest on a shared canonical store with dedup + tiers.* Bi-temporal graph with entity resolution, fact invalidation, and three abstraction tiers. Differences: dedup = entity resolution + temporal supersession (not embedding-cluster canonicalization); no budget-constrained composition objective; duplication/reuse not measured.
-
-Runner-ups to differentiate from: **A-MEM** (evolving linked notes), **LightMem** (dedup-via-fusion + token savings), **MemGAS** (multi-granularity + adaptive selection), **AWM** (reusable workflows), **SemDeDup** (semantic dedup, but for training data).
+**Reusable takeaway:** we don't need a new selector or a new "memory type." We need to make **canonicalization a query-aware, measured, optimized object.**
 
 ---
 
-## 3. What parts of our idea are NOT novel?
+## Direction A — *Canonical memory as a shared decision variable* (co-design of dedup + composition) — **RECOMMENDED**
 
-- Extracting compact/canonical memory units. (A-MEM, Mem0, AWM, Voyager)
-- Maintaining multiple typed/granularity views. (MIRIX, MemGAS, PerLTQA, Collaborative Memory)
-- A shared memory store reused across sessions/users/agents. (Zep, Collaborative Memory, G-Memory)
-- Query-aware routing/selection. (MemGAS, Adaptive-RAG, Self-RAG)
-- Token-budgeted, redundancy-aware set selection with optimality guarantees. (**AdaGReS, Lin–Bilmes** — this is the big one)
-- Context compression to save tokens. (LLMLingua family, RECOMP, Provence, Gist/xRAG)
-- Reporting large token/storage savings. (Mem0, LightMem, MIRIX, RecMem)
+**Perspective:** optimization / theory.
 
-**If the paper's contribution is any one of these, it is not publishable at a top venue.**
+**Title (working):** "One Store, Many Views: Co-Designing Semantic Deduplication and Token-Budgeted Composition for LLM Agent Memory."
 
----
+**Core hypothesis.** If the memory store is a set of **canonical units** plus cheap **view-projection functions** (not independently stored views), then choosing *which units to canonicalize* can be optimized against the *distribution of future queries/views* so that a single act of deduplication reduces **both** storage duplication **and** expected per-query context tokens — provably, not incidentally.
 
-## 4. What parts MIGHT be novel? (candidate whitespace, to be pressure-tested in Phase 2)
+**Why it's new (vs the closest work):**
+- vs **AdaGReS**: AdaGReS solves `select subset | fixed corpus, this query`. We solve `design canonical store | query distribution` and *then* let an AdaGReS-style composer run on top. The store is the variable; AdaGReS becomes our inner loop, not our competitor.
+- vs **MIRIX**: MIRIX duplicates a fact across typed views; we store it once and project. This is *measurably* less duplication — a head-to-head we can win on a metric MIRIX never reports.
+- vs **SemDeDup**: SemDeDup dedups blindly (offline, corpus-agnostic, destructive). Ours is *query-distribution-aware and non-destructive* (views reconstruct distinctions on demand).
 
-Ranked by how defensible they currently look:
+**Claim to prove (the moat).** *Coupling theorem (to be proven, currently a conjecture):* under stated conditions on the view-projection functions and query distribution, merging semantically equivalent units is **monotone** in both (i) storage-duplication reduction and (ii) expected per-query token cost — i.e. the two efficiencies are aligned, and there exists a characterizable regime where they are **not** (where naive dedup hurts a task by collapsing a needed distinction). Characterizing that boundary is the paper.
+> Honesty flag: this theorem is *hypothesized*, not established. Phase 2 must sketch and stress-test it. If it's trivially always-true or false, Direction A downgrades to Findings-tier and we prefer C.
 
-1. **Joint storage-and-context objective over one shared canonical-unit store (strongest).** Prior work optimizes *either* storage (dedup/consolidation: SemDeDup, Zep, LightMem) *or* context tokens (AdaGReS, LLMLingua, RECOMP) — **not both jointly, and not over the same canonical units.** A formulation where deduplicating the store into canonical units is the *same* representation that a budgeted composer draws views from — so that dedup provably shrinks both storage duplication *and* per-query token cost — appears unclaimed. This reframes the contribution from "another selector" to "a representation that makes storage and context efficiency the same optimization."
-2. **Explicit semantic deduplication of a *live agent memory store* into audited canonical units (moderate–strong).** SemDeDup does embedding-cluster canonicalization for training data; agent-memory systems only merge implicitly (A-MEM evolution, Mem0 UPDATE, Zep invalidation). Bringing SemDeDup-style canonicalization *into* agent memory, with lossless-view reconstruction and conflict handling (à la Reddy & Challaram 2026), is a concrete, testable mechanism — but it risks being seen as "SemDeDup applied to memory," so it needs the joint-objective framing above to be more than an application.
-3. **Task-utility (not embedding-relevance) as the composition objective, with a measurement suite (moderate).** AdaGReS/Cost-Aware Selection use relevance/coverage proxies; Cost-Aware's negative result ("no static selector dominates") invites a *learned, utility-grounded* budgeted composer over typed units. Pairs naturally with new **duplication-ratio / reuse-rate / token-efficiency** metrics that the field currently under-reports.
-4. **Cross-view canonical sharing that provably reduces duplication (moderate, depends on #1).** One canonical unit instantiated into many task-specific views (rather than duplicated per view) — the "shared" in the hypothesis — is only novel if we *measure* the duplication avoided and show it is not achievable by existing multi-view systems (which store views largely independently).
+**Decisive experiment.** As the store grows over multi-session data, plot **duplication ratio** and **per-query tokens** for: full-context, Mem0, MIRIX, Zep, AdaGReS-over-fixed-store, and ours. Win = ours reduces *both* where each baseline reduces at most one, at equal or better task accuracy.
 
----
+**Risk:** the coupling may be trivial (any dedup cuts tokens). Mitigation: the *task-utility* side — show naive dedup *loses accuracy* by merging task-relevant distinctions, and that query-aware canonicalization avoids it. That asymmetry is itself the result.
 
-## 5. What would a skeptical reviewer say?
-
-Anticipated reviews (full simulation is Phase 15; these guide Phases 2–6):
-
-- **"This is MIRIX + AdaGReS + SemDeDup stapled together."** → Must show a *mechanism* where the pieces are inseparable (dedup and budgeted composition sharing one canonical representation), not a pipeline of known parts.
-- **"AdaGReS already does token-budgeted redundancy-aware selection with guarantees; what's new in your selector?"** → Differentiate on *heterogeneous typed memory units + measured task utility + a persistent deduplicated store*, and ideally a *joint* objective AdaGReS does not have.
-- **"Your token savings just replicate Mem0/LightMem/MIRIX."** → Token savings alone are table stakes. The novelty must be the **duplication↔token coupling** and its measurement, shown against these exact baselines.
-- **"You never measure duplication or reuse — the central claims."** → We must define and report **Memory Duplication Ratio, Memory Reuse Rate, Token Efficiency, Context Compression Ratio** (Phase 9), or the paper's own thesis is unfalsified.
-- **"Gains are LoCoMo-only / one LLM."** → Need ≥2 benchmark families (e.g. LoCoMo + LongMemEval + a reuse benchmark like WebArena/Mind2Web via AWM) and ≥2 LLMs (RQ6).
+**Venue fit:** NeurIPS / ICLR (theory + systems). **Top-tier if the theorem has teeth; Findings if not.**
 
 ---
 
-## 6. Smallest defensible novel contribution (working hypothesis for Phase 4)
+## Direction B — *Content-addressed canonical store with on-demand view projection* (representation)
 
-> **A shared canonical-memory-unit store in which semantic deduplication and token-budgeted, task-utility-driven view composition are two projections of a single objective — so that consolidating the store provably reduces *both* storage duplication and per-query context tokens — evaluated with a duplication/reuse/token-efficiency metric suite that prior memory systems do not report.**
+**Perspective:** representation / systems.
 
-This is defensible because: (a) it is a *mechanism/representation* claim, not a feature list; (b) it targets the one dimension (explicit dedup of live memory) that is genuinely thin; (c) it turns AdaGReS/Lin–Bilmes from competitors into the *composition sub-routine* inside a larger, novel storage-context-coupled objective; (d) it is directly falsifiable via new metrics.
+**Title (working):** "Project, Don't Duplicate: Content-Addressed Canonical Memory with Query-Conditioned Views."
 
-**What would strengthen it (additional technical contribution):**
-- A formal result that, under stated assumptions, deduplication of the canonical store is *monotone* in both storage-duplication reduction and expected per-query token reduction (i.e. the two objectives are aligned, not traded off) — this would be a genuine theoretical hook AdaGReS/MIRIX lack.
-- A *learned* utility/sufficiency estimator (leveraging FILCO's CXMI-style signal) so composition uses measured task utility, addressing Cost-Aware Selection's "no static selector dominates."
+**Core hypothesis.** Factor every memory into an **invariant canonical content unit** + a set of **view functions** (episodic / semantic / procedural / temporal renderings) computed on demand. One physical unit, many logical views. This is the representational payoff Direction A assumes.
 
----
+**Why it's new:** MIRIX/PerLTQA/Collaborative Memory all realize "multiple views," but by *storing* them separately. The novelty is the **factorization** — content-addressing (a unit is keyed by its semantic content, so equivalent memories collide and dedup for free) + view-functions that regenerate type-specific presentations. Nobody stores once and projects N ways with measured duplication elimination.
 
-## 7. Experiments needed to establish novelty (preview of Phases 6/9/10)
+**Claim to prove:** view-projection preserves task accuracy vs. independently-stored views (no information loss) while eliminating cross-view duplication — i.e. "shared canonical + projection" is a *lossless* compression of "N independent typed stores."
 
-1. **Baselines that pin each pillar:** full-context, naive vector RAG, summarization memory (Recursive Summarization), Mem0, MIRIX (multi-view), Zep (graph+dedup), AdaGReS (budgeted selection) — showing none jointly optimize duplication + tokens.
-2. **The coupling result, measured:** report Memory Duplication Ratio and per-query token cost *as the store grows*, demonstrating our canonical-unit store reduces both where baselines reduce at most one.
-3. **Ablations isolating the novel bit:** remove dedup → duplication + tokens rise; remove the joint objective (dedup then independent selection) → show the coupling matters; vs. store views independently (MIRIX-style) → show shared canonical units avoid duplication.
-4. **Generalization:** ≥2 benchmark families, ≥2 LLMs (RQ6).
-5. **Falsification guard:** if dedup does *not* reduce token cost, or joint ≈ decoupled, the central claim fails honestly — this must be reportable.
+**Decisive experiment:** reproduce MIRIX's six-type setup, then swap independent typed stores for one canonical store + projections; measure duplication eliminated and accuracy retained on LoCoMo/LongMemEval.
+
+**Risk:** projection functions may be expensive or lossy. Mitigation: cache hot views; report the compute/latency trade-off honestly (Part 9 metrics).
+
+**Venue fit:** strong systems/Findings; becomes top-tier *only bundled with A's theorem*. **Best used as the mechanism inside Direction A, not alone.**
 
 ---
 
-## 8. Open uncertainties to resolve before Phase 4
+## Direction C — *A duplication-aware benchmark + metric suite that exposes hidden redundancy in SOTA memory* (measurement)
 
-- **Is the storage↔token coupling actually non-trivial,** or does any dedup automatically reduce tokens? (Needs a small pilot / formal argument — this determines whether the strongest angle survives.)
-- **Does AdaGReS's PDF contain anything closer** (e.g. typed units, task utility) than its abstract suggests? → read the full PDF in Phase 2.
-- **Which 2026 preprints are peer-reviewed** vs. arXiv-only, and are any *even closer* (re-verify the fabrication-flagged space carefully).
-- **Metric standardization:** are Duplication Ratio / Reuse Rate already defined anywhere? (Not found so far — likely a contribution, but must confirm.)
+**Perspective:** evaluation. (Benchmark/analysis papers get into top venues — LoCoMo, LongMemEval, MemoryAgentBench all did.)
+
+**Title (working):** "How Much Do Agents Remember Twice? Measuring and Stressing Redundancy in LLM Memory Systems."
+
+**Core hypothesis.** Current SOTA memory systems silently store and re-inject large amounts of semantically duplicate content, and *no benchmark measures it.* A redundancy-stress benchmark (near-duplicate facts recurring across sessions, paraphrased restatements, contradictory updates) plus formal metrics will reveal this and reorder the leaderboard.
+
+**Why it's new:** every benchmark (LoCoMo, LongMemEval, MemoryAgentBench) measures answer quality; **none** measure duplication ratio, cross-view reuse rate, or token efficiency *as a function of redundancy in the input stream*. This is an unclaimed, high-leverage gap.
+
+**Contribution:** (1) mathematically-defined **Memory Duplication Ratio, Memory Reuse Rate, Token Efficiency, Context Compression Ratio**; (2) a redundancy-stress dataset (built by injecting controlled near-duplicates into existing multi-session data — no fabrication of results, just controlled data construction); (3) an audit of Mem0/MIRIX/Zep/A-MEM showing where they duplicate.
+
+**Decisive experiment:** the audit *is* the result — run the suite across SOTA systems, publish the duplication leaderboard.
+
+**Risk:** lower "wow" than a new method. Mitigation: pair with Direction A/B as the evaluation half of a method paper (strongest combo), or stand alone as a Datasets & Benchmarks track submission (a real top-tier track).
+
+**Venue fit:** NeurIPS Datasets & Benchmarks, or the eval backbone of A. **Lowest-risk route to a real top-tier acceptance.**
 
 ---
 
-## Phase 1 summary
+## Direction D — *Non-destructive semantic canonicalization with provenance and reversible merges* (lifecycle)
 
-- **Completed:** ~71 verified papers reviewed; literature matrix + narrative review built; per-pillar novelty pre-assessment done.
-- **Learned:** the original hypothesis is a bundle of already-precedented pillars; the token-budget core is pre-empted by AdaGReS/Lin–Bilmes; the genuine thin spot is *explicit semantic dedup of live memory* and, above it, *joint storage-context optimization over shared canonical units* — plus an under-served *measurement* gap (duplication/reuse metrics).
-- **Uncertain:** whether the storage↔token coupling is non-trivial enough to anchor a theorem; whether any un-read PDF (esp. AdaGReS) is closer than believed.
-- **Decisions made:** do **not** frame novelty as "canonical units + multi-view + budgeted selection" (all precedented); pivot toward the coupling + measurement framing.
-- **What I need you to do:** confirm the direction (see recommendation) and whether to prioritize the *theoretical coupling* angle vs. the *empirical dedup-for-memory* angle.
-- **Recommended next step:** proceed to **Phase 2 (novelty matrix + analysis)**, including reading the AdaGReS, MIRIX, and Collaborative Memory PDFs in full to lock the differentiation, before committing to a direction in Phase 4.
+**Perspective:** dynamics / safety.
+
+**Title (working):** "Reversible Memory: Provenance-Preserving Semantic Deduplication for Agents."
+
+**Core hypothesis.** Dedup is usually destructive (merge → lose the originals → can't recover a distinction a later task needs). A canonical store that keeps provenance and supports **un-merge on demand** (triggered when a query needs a collapsed distinction) beats both no-dedup (bloated) and destructive dedup (lossy), and integrates deterministic conflict resolution (Reddy & Challaram 2026) for contradictory updates.
+
+**Why it's new:** SemDeDup and store-consolidation are destructive; A-MEM "evolution" and Zep "invalidation" transform without a reversible, query-triggered un-merge. Reversibility as a first-class memory operation is unclaimed.
+
+**Claim to prove:** reversible canonicalization dominates the Pareto frontier of {storage, tokens, task accuracy} vs. no-dedup and destructive-dedup.
+
+**Risk:** engineering-heavy; novelty is narrower. **Best as a component/ablation of A, or a follow-up paper.**
+
+**Venue fit:** Findings/workshop alone; a strong *section* of A.
+
+---
+
+## Recommended bet
+
+**Build Direction A, with B as its mechanism and C as its evaluation.** That single paper is:
+- **Theoretically novel** (the coupling result — the moat AdaGReS/MIRIX lack),
+- **Mechanistically novel** (project-don't-duplicate canonical store — beats MIRIX on a metric it never reports),
+- **Empirically novel** (duplication/reuse metrics + redundancy-stress audit the field doesn't have).
+
+Any one of the three alone is Findings-tier. **Together they're a coherent top-tier story: "we reframe memory efficiency as one optimization over a shared canonical store, prove when storage and context efficiency align, and measure a redundancy axis prior work ignored."**
+
+Directions C and D are also your **fallback ladder**: if A's theorem collapses in Phase 2, C alone is still a credible top-tier Datasets & Benchmarks submission, and D backfills a strong methods section.
+
+---
+
+## The go/no-go gate (Phase 2) — what makes this decision, not a guess
+
+Phase 2 answers exactly one question and picks the path:
+
+1. **Read in full** (not abstracts): AdaGReS, MIRIX, Collaborative Memory, SemDeDup, Zep — confirm none already own the coupling result or the metrics.
+2. **Sketch the coupling theorem** and stress-test with a toy pilot: does query-aware dedup reduce tokens *without* losing task-relevant distinctions, and is there a characterizable failure regime?
+3. **Decide:**
+   - Theorem has teeth → **A+B+C, aim top-tier.**
+   - Theorem trivial/false → **C standalone (Datasets & Benchmarks) + D**, aim top-tier via the eval route instead.
+
+Either branch lands somewhere real. That's why the gate is worth running before committing weeks.
+
+---
+
+## Mapping back to your original RQs (nothing wasted)
+
+- RQ1 (reuse one unit across views) → **Direction B** (project-don't-duplicate) makes it *measurable*.
+- RQ2 (semantic dedup) → **Directions A/D** (query-aware + reversible), not blind SemDeDup.
+- RQ3 (views vs flat retrieval) → **Direction C** metrics quantify it.
+- RQ4 (token-budget without quality loss) → **Direction A**'s composer (AdaGReS as inner loop) + task-utility objective.
+- RQ5 (tradeoffs) → **Direction C**'s Pareto/metric suite is exactly this.
+- RQ6 (generalization) → experimental requirement across ≥2 benchmark families, ≥2 LLMs, in every direction.
+
+**Your instinct was right about the ingredients; the novelty was in the wrong place. Move it from "we have these features" to "we prove storage and context efficiency are one optimization, and we measure the axis everyone skipped."**
