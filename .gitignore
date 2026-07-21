@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+.ipynb_checkpoints/
+
+# Environment / secrets
+.env
+*.key
+secrets/
+
+# Data / large artifacts
+data/raw/
+data/cache/
+*.faiss
+*.index
+*.pt
+*.bin
+
+# Experiment outputs
+runs/
+logs/
+wandb/
+results/*.json
+results/*.csv
+
+# LaTeX build
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.bbl
+paper/*.blg
+paper/*.synctex.gz
+paper/*.fdb_latexmk
+paper/*.fls
+paper/**/*.aux
+
+# OS
+.DS_Store
+Thumbs.db
