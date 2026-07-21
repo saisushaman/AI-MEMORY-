@@ -41,3 +41,6 @@ paper/**/*.aux
 # OS
 .DS_Store
 Thumbs.db
+experiments/data/
+*.txt
+!*_output.txt

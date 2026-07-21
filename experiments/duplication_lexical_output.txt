@@ -1,0 +1,21 @@
+============================================================================================
+LoCoMo REAL-DATA duplication pilot (Tier 1: lexical Jaccard) -- extracted `observation` facts
+============================================================================================
+
+### field = observation-facts  (corpus: 2541 units across 10 conversations)
+scope              tau   units  canonical     MDR     RTF  max_dup
+per-conv avg      1.00     254        254   0.000   0.000        2
+per-conv avg      0.80     254        253   0.001   0.001        2
+per-conv avg      0.60     254        251   0.009   0.007        3
+
+### field = raw-turns  (corpus: 5882 units across 10 conversations)
+scope              tau   units  canonical     MDR     RTF  max_dup
+per-conv avg      1.00     588        587   0.001   0.000        3
+per-conv avg      0.80     588        587   0.002   0.000        3
+per-conv avg      0.60     588        584   0.006   0.002        7
+
+MDR = 1 - canonical/units (fraction of memory units that are near-duplicates of another)
+RTF = fraction of stored tokens attributable to redundant copies
+max_dup = largest near-duplicate cluster (times a single fact recurs)
+
+NOTE: lexical proxy; Tier 2 (embeddings) will catch paraphrase-level duplication this misses (so these are LOWER bounds).

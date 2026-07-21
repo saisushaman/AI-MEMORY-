@@ -1,0 +1,31 @@
+Loading model: sentence-transformers/all-MiniLM-L6-v2
+====================================================================================================
+LoCoMo REAL-DATA duplication pilot (Tier 2: SEMANTIC cosine, all-MiniLM-L6-v2) -- `observation` facts
+====================================================================================================
+Embedding 2541 observation facts...
+
+### per-conversation average (within a single conversation's multi-session history)
+   tau   units  canonical     MDR     RTF dup_grps  max_dup
+  0.95     254        253   0.003   0.002        0        2
+  0.90     254        248   0.025   0.026        4        5
+  0.85     254        229   0.102   0.105       11       14
+  0.80     254        188   0.268   0.278       20       46
+  0.75     254        128   0.507   0.515       18      148
+
+### corpus-wide (all 2541 facts pooled across 10 conversations)
+   tau   units  canonical     MDR     RTF dup_grps  max_dup
+  0.95    2541       2535   0.002   0.002        6        2
+  0.90    2541       2483   0.023   0.023       44        5
+  0.85    2541       2294   0.097   0.099      112       14
+  0.80    2541       1875   0.262   0.270      200       46
+  0.75    2541       1266   0.502   0.508      178      148
+
+### example semantic near-duplicate pairs (corpus, cosine>=0.85):
+  [0.92] 'Caroline is planning to continue her education and explore career opti'  <=>  'Caroline is considering a career in counseling and mental health to he'
+  [0.87] 'Caroline is researching adoption agencies with the dream of having a f'  <=>  'Caroline sees adoption as a way to share her love and provide a safe, '
+  [0.87] 'Melanie values family moments and feels they make life awesome, alive,'  <=>  'Melanie values family time and finds it to be special and important.'
+  [0.87] 'Melanie values family moments and feels they make life awesome, alive,'  <=>  'Melanie values special moments with her kids and is grateful for them.'
+  [0.90] 'Caroline is considering a career in counseling and mental health, part'  <=>  'Caroline is considering a career in counseling and mental health to he'
+  [0.89] 'Caroline attended an LGBTQ+ pride parade last week and felt a sense of'  <=>  'Caroline went to a pride parade a few weeks ago and felt accepted and '
+  [0.86] 'Caroline attended an LGBTQ+ pride parade last week and felt a sense of'  <=>  'Caroline and her activist group participated in a pride parade last we'
+  [0.92] 'Caroline attended an LGBTQ+ pride parade last week and felt a sense of'  <=>  'Caroline attended a pride parade recently and felt inspired by the com'
