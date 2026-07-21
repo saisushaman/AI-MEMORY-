@@ -1,0 +1,34 @@
+==============================================================================
+SYNTHETIC COUPLING PILOT  (seed=20260721) -- NOT a benchmark result
+==============================================================================
+Full store: 800 units, 31851 stored tokens (K=200 facts x R=4 near-dups)
+
+--- rho = 0.00  (fraction of clusters with a task-relevant distinction) ---
+dedup       composer   units  stored_tok  ctx_tok/q  success
+none        oracle       800       31851      138.7    1.000
+none        topk         800       31851      288.7    0.338
+naive       oracle       200        5551      138.7    1.000
+naive       topk         200        5551      288.7    0.419
+query_aware oracle       200        5551      138.7    1.000
+query_aware topk         200        5551      288.7    0.413
+
+--- rho = 0.10  (fraction of clusters with a task-relevant distinction) ---
+dedup       composer   units  stored_tok  ctx_tok/q  success
+none        oracle       800       31851      141.0    1.000
+none        topk         800       31851      288.5    0.300
+naive       oracle       200        5551      134.9    0.866
+naive       topk         200        5551      288.7    0.357
+query_aware oracle       219        6292      141.0    1.000
+query_aware topk         219        6292      289.0    0.372
+
+--- rho = 0.30  (fraction of clusters with a task-relevant distinction) ---
+dedup       composer   units  stored_tok  ctx_tok/q  success
+none        oracle       800       31851      145.8    1.000
+none        topk         800       31851      288.6    0.212
+naive       oracle       200        5551      123.8    0.583
+naive       topk         200        5551      288.5    0.235
+query_aware oracle       257        7875      145.8    1.000
+query_aware topk         257        7875      289.2    0.302
+
+Read: compare 'ctx_tok/q' between composers (oracle=optimal, topk=realistic)
+and 'success' between dedup=naive vs query_aware as rho grows.
