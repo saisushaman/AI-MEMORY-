@@ -58,3 +58,28 @@ Verified example near-duplicate pairs (cosine ≥ 0.85), *within a single conver
 - Single dataset, single extractor + embedder.
 
 **Effect on the thesis:** the measurement contribution and the query-aware-canonicalization motivation now hold on three independent angles that agree — (a) synthetic pilot, (b) LoCoMo observation stream, (c) a real LLM-built store with a real dedup gate. Remaining for publication-grade evidence: a better/standard extractor (Mem0/A-MEM) to pin the absolute baseline, plus a second dataset (LongMemEval) for generalization.
+
+---
+
+## Phase 3c — Does dedup affect ANSWER QUALITY? (the "without degrading task performance" half)
+
+Three memory policies answer LoCoMo QA (cats 1–4) via RAG over the per-conversation fact store (qwen3:8b answerer, nomic-embed retrieval, k=8 facts/question, n=200). Script: [`../experiments/qa_dedup_eval.py`](../experiments/qa_dedup_eval.py); output `../experiments/qa_dedup_output.txt`.
+- **full** — top-k from the full store (no dedup)
+- **naive_dedup** — store blindly canonicalized at τ=0.82 (≈76% smaller), then top-k
+- **query_aware** — full store, top-k by MMR (relevance − redundancy) [classic composer, proxy for the query-aware idea]
+
+| policy | F1 | containment | ctx tokens/q |
+|---|--:|--:|--:|
+| full | 0.260 | 0.160 | 77.5 |
+| **naive_dedup** | **0.146** | **0.085** | 77.7 |
+| **query_aware** | **0.270** | **0.165** | 79.0 |
+
+**Findings:**
+1. **Naive/blind semantic dedup severely degrades QA: F1 −44%, containment −47%.** Real-data confirmation of the over-merge (ρ) risk — you cannot compact a memory store by blindly merging near-duplicates.
+2. **Query-aware composition preserves quality** (matches full: 0.270 vs 0.260). Redundancy-aware selection is *safe*.
+
+**What is NOT shown (honest):**
+- **Token/storage efficiency was not demonstrated.** k=8 was fixed, so context tokens are ~equal across arms (77–79) by construction; query_aware preserved quality but did not *save* tokens. This tested accuracy-at-fixed-budget, not tokens-at-fixed-accuracy.
+- **Absolute accuracy is low** (F1 0.26 / containment 0.16): the qwen3-extraction+retrieval pipeline is weak in absolute terms (drops specifics such as dates). Only the *relative* cross-arm comparison (same pipeline) is valid; absolute numbers are not competitive — flagged, not hidden.
+
+**Net:** the *necessity* of query-awareness is strongly supported (naive dedup breaks QA; query-aware is safe). The *efficiency* claim (same quality at fewer tokens/facts) still needs a **budget sweep** (vary k / store-compaction and plot accuracy vs tokens) — the next experiment.
