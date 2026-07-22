@@ -44,3 +44,4 @@ Thumbs.db
 experiments/data/
 *.txt
 !*_output.txt
+experiments/cache/

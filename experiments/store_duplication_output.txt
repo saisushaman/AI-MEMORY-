@@ -1,0 +1,24 @@
+================================================================================================
+DEPLOYED-STORE duplication: naive add-all vs Mem0-style gated add (GATE=0.85)
+Store built by LLM extraction on LoCoMo; duplication measured by nomic-embed cosine
+================================================================================================
+
+--- policy=naive  avg store size=683 facts/conv ---
+   tau   units  canonical     MDR     RTF
+  0.95     683        642   0.062   0.058
+  0.90     683        492   0.288   0.291
+  0.85     683        264   0.620   0.626
+  0.80     683         93   0.865   0.868
+  0.75     683         25   0.962   0.966
+
+--- policy=gated  avg store size=384 facts/conv ---
+   tau   units  canonical     MDR     RTF
+  0.95     384        384   0.000   0.000
+  0.90     384        384   0.000   0.000
+  0.85     384        384   0.000   0.000
+  0.80     384        140   0.642   0.654
+  0.75     384         33   0.916   0.924
+
+Interpretation: MDR under 'naive' = duplication a plain extract-store pipeline accumulates;
+MDR under 'gated' = duplication that SURVIVES a similarity-gated dedup (Mem0-style).
+Total extracted: 6834 facts (6801 unique) from 10 convs; naive avg 683/conv, gated(0.85) avg 384/conv
