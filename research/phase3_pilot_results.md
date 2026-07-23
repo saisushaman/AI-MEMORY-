@@ -83,3 +83,25 @@ Three memory policies answer LoCoMo QA (cats 1–4) via RAG over the per-convers
 - **Absolute accuracy is low** (F1 0.26 / containment 0.16): the qwen3-extraction+retrieval pipeline is weak in absolute terms (drops specifics such as dates). Only the *relative* cross-arm comparison (same pipeline) is valid; absolute numbers are not competitive — flagged, not hidden.
 
 **Net:** the *necessity* of query-awareness is strongly supported (naive dedup breaks QA; query-aware is safe). The *efficiency* claim (same quality at fewer tokens/facts) still needs a **budget sweep** (vary k / store-compaction and plot accuracy vs tokens) — the next experiment.
+
+---
+
+## Phase 3d — Budget sweep (efficiency test) — PARTLY NEGATIVE
+
+Varied retrieval budget k∈{2,4,8,12} for the three policies; accuracy vs context tokens. Script: [`../experiments/qa_budget_sweep.py`](../experiments/qa_budget_sweep.py); output `../experiments/qa_budget_sweep_output.txt`.
+
+| policy | k=2 F1 | k=4 F1 | k=8 F1 | k=12 F1 |
+|---|--:|--:|--:|--:|
+| full | 0.217 | 0.251 | 0.260 | 0.285 |
+| naive_dedup | 0.116 | 0.136 | 0.146 | 0.153 |
+| query_aware (MMR) | 0.184 | 0.213 | 0.270 | 0.291 |
+
+(ctx tokens/q ≈ 19 / 39 / 78 / 117 across all policies at each k.)
+
+**Findings:**
+1. ✅ **naive/blind dedup is Pareto-dominated at every budget** (F1 far below both others at matched tokens). Robust negative result about blind store compaction.
+2. ❌ **The efficiency hypothesis FAILED.** Query-aware (MMR) does *not* reach full's accuracy at fewer tokens. It is **worse than full at low budgets** (k=2: 0.184 vs 0.217; k=4: 0.213 vs 0.251) and only marginally better at high budgets (+0.01 at k=8/12). full and query_aware lie on essentially the **same Pareto front** — no token saving. MMR diversity hurts at small k (drops a relevant redundant fact for a less-relevant diverse one).
+
+**Interpretation & caveat:** on this pipeline, composition-level redundancy handling (MMR) yields **no efficiency win**. BUT the pipeline is weak in absolute terms (containment ~0.16 — extracted facts often lack the answer), which could **mask** any redundancy-driven benefit; the negative result may be a pipeline artifact rather than a verdict on the mechanism. Needs re-test with a stronger extractor before concluding the method fails.
+
+**Effect on strategy (honest):** the top-tier *method* story ("efficient query-aware canonicalization") is now **empirically unsupported**. What remains strong is (a) the **measurement** contribution and (b) the **necessity** result (naive dedup harmful at all budgets) — i.e. the **Datasets & Benchmarks / analysis** paper (the fallback ladder). Decision pending: (i) rebuild with a stronger extractor to rule out the pipeline artifact and retry the efficiency test, or (ii) commit to the benchmark/analysis paper.
