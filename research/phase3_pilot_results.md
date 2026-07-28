@@ -105,3 +105,35 @@ Varied retrieval budget k∈{2,4,8,12} for the three policies; accuracy vs conte
 **Interpretation & caveat:** on this pipeline, composition-level redundancy handling (MMR) yields **no efficiency win**. BUT the pipeline is weak in absolute terms (containment ~0.16 — extracted facts often lack the answer), which could **mask** any redundancy-driven benefit; the negative result may be a pipeline artifact rather than a verdict on the mechanism. Needs re-test with a stronger extractor before concluding the method fails.
 
 **Effect on strategy (honest):** the top-tier *method* story ("efficient query-aware canonicalization") is now **empirically unsupported**. What remains strong is (a) the **measurement** contribution and (b) the **necessity** result (naive dedup harmful at all budgets) — i.e. the **Datasets & Benchmarks / analysis** paper (the fallback ladder). Decision pending: (i) rebuild with a stronger extractor to rule out the pipeline artifact and retry the efficiency test, or (ii) commit to the benchmark/analysis paper.
+
+---
+
+## Phase 3e — Diagnosis + fair-metric rescore (LLM judge)
+
+**Diagnosis (no LLM calls):** the gold answer is absent even from the raw dialogue for most questions (`ans_in_rawturns`=0.34 overall) and extraction preserves nearly all of it (`ans_in_facts`=0.30). So extraction is *not* the main bottleneck — **string-F1/containment structurally undercounts LoCoMo** (answers are reformulated). The weak absolute Phase-3c/3d numbers were largely a metric artifact.
+
+**Fair-metric rescore:** re-scored the cached Phase-3d answers with an LLM judge (qwen3:8b), by category. Script: [`../experiments/judge_sweep.py`](../experiments/judge_sweep.py); output `../experiments/judge_sweep_output.txt`.
+
+Overall accuracy (n=200):
+| policy | k=2 | k=4 | k=8 | k=12 |
+|---|--:|--:|--:|--:|
+| full | 0.265 | 0.330 | 0.375 | 0.400 |
+| naive_dedup | 0.150 | 0.180 | 0.205 | 0.210 |
+| query_aware | 0.240 | 0.285 | 0.370 | 0.400 |
+
+Category 1 — multi-hop (n=43):
+| policy | k=2 | k=4 | k=8 | k=12 |
+|---|--:|--:|--:|--:|
+| full | 0.140 | 0.256 | 0.302 | 0.372 |
+| query_aware | **0.186** | 0.233 | **0.326** | **0.395** |
+| naive_dedup | 0.116 | 0.116 | 0.209 | 0.209 |
+
+Category 4 — single-hop (n=93): query_aware ties full at k=8/12 (0.591, 0.613), slightly worse at low k; naive_dedup dominated.
+
+**Findings:**
+1. Metric was the issue — absolute accuracy 0.16 → up to 0.61 under a proper judge.
+2. naive_dedup remains **dominated** everywhere (robust across metrics/categories).
+3. The **theory-predicted pattern appears**: query_aware > full on **multi-hop** (3 of 4 budgets) and only ties on single-hop (diversity helps coverage, not single-fact recall). Direction matches the thesis, not random.
+4. **Underpowered:** multi-hop n=43; gaps are ~1–2 questions, not significant. Overall (n=200) query_aware does not beat full.
+
+**Status:** method moved from "failed" (string metric) to "directional-but-underpowered" (judge metric). Phase 3f (running) expands to all ~282 multi-hop questions at k∈{8,12} with a paired McNemar test to decide significance.
