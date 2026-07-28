@@ -137,3 +137,26 @@ Category 4 — single-hop (n=93): query_aware ties full at k=8/12 (0.591, 0.613)
 4. **Underpowered:** multi-hop n=43; gaps are ~1–2 questions, not significant. Overall (n=200) query_aware does not beat full.
 
 **Status:** method moved from "failed" (string metric) to "directional-but-underpowered" (judge metric). Phase 3f (running) expands to all ~282 multi-hop questions at k∈{8,12} with a paired McNemar test to decide significance.
+
+---
+
+## Phase 3f — Multi-hop at full statistical power (DECISIVE, negative for the method)
+
+All ~282 LoCoMo cat-1 (multi-hop) questions, k∈{8,12}, LLM-judged, paired McNemar test of query_aware vs full. Script: [`../experiments/qa_multihop_expand.py`](../experiments/qa_multihop_expand.py); output `../experiments/multihop_expand_output.txt`.
+
+| policy | k=8 | k=12 |
+|---|--:|--:|
+| full | 0.365 | 0.411 |
+| naive_dedup | 0.152 | 0.163 |
+| query_aware | 0.358 | 0.433 |
+
+Paired McNemar (query_aware vs full): k=8 b=31/c=33 **p=0.90**; k=12 b=29/c=23 **p=0.49** — **not significant** at either budget.
+
+**Verdict:** at proper sample size, **query_aware (MMR) composition is statistically indistinguishable from full retrieval** on multi-hop — the category where it should win. The n=43 signal in Phase 3e was noise and did not survive. The composition-time query-aware method delivers **no accuracy or efficiency benefit**.
+
+**Robust conclusions (across all Phase-3 experiments):**
+1. Semantic duplication in LLM agent memory is real, substantial, and invisible to lexical methods (Phase 3/3b).
+2. **Blind/naive semantic dedup is harmful** — dominated at every budget, both metrics, all categories (Phase 3c/3d/3e/3f).
+3. **Redundancy-aware composition (MMR) is safe but not beneficial** — indistinguishable from full (Phase 3f, n=282, n.s.).
+
+**Net story:** "duplication is pervasive; the intuitive fix (dedup) hurts; the careful fix (redundancy-aware composition) doesn't help." This is an honest, evidence-backed **measurement + analysis / negative-result** contribution — NOT a top-tier method result. The composition-time query-aware method is not viable as tested; a store-level query-distribution-aware method was not built and has no empirical reason (from this evidence) to be expected to help, since the easier composition-time redundancy removal already yields nothing.

@@ -97,7 +97,9 @@ This is defensible because: (a) it is falsifiable and the pilot already shows th
 | Shared-canonical projection (vs independent views) | **Solid mechanism.** Differentiates from MIRIX/Collab. |
 | Original storage↔token coupling theorem | **Dropped.** Pilot falsified the monotonicity claim. |
 
-**Recommended paper = C (measurement) + revised-A (query-aware canonicalization with the ρ-bounded utility theorem) + B (shared-canonical projection as the mechanism).** Headline: *"What agents remember twice: measuring memory redundancy, and query-aware canonicalization that saves storage without the task-utility loss naive dedup incurs."*
+> **UPDATE (Phase 3, 2026-07-22) — the method half was empirically tested and did NOT hold.** See [`phase3_pilot_results.md`](phase3_pilot_results.md). On LoCoMo with a proper LLM judge: (i) real semantic duplication exists (~10% at τ=0.85; higher in LLM-built stores); (ii) **naive/blind dedup is harmful** (dominated at every budget); (iii) **query-aware (MMR) composition is statistically indistinguishable from full retrieval** on multi-hop at n=282 (McNemar p=0.90 at k=8, p=0.49 at k=12). The revised-A "query-aware canonicalization beats naive without losing utility" reduces to "query-aware is *safe* but gives *no benefit*." **Revised-A is therefore NOT a viable top-tier method result.** The surviving contribution is **C (measurement) + the negative/analysis finding** — see the addendum at the end of this file.
+
+**Recommended paper (pre-Phase-3, now superseded — kept for the record) = C (measurement) + revised-A (query-aware canonicalization with the ρ-bounded utility theorem) + B (shared-canonical projection as the mechanism).** Headline: *"What agents remember twice: measuring memory redundancy, and query-aware canonicalization that saves storage without the task-utility loss naive dedup incurs."*
 
 **Fallback ladder (unchanged, now evidence-backed):** if the ρ-utility theorem proves hard to state cleanly, **C alone** (metrics + redundancy-stress audit of SOTA) is a credible NeurIPS Datasets & Benchmarks submission, with revised-A as the method section.
 
@@ -113,3 +115,20 @@ This is defensible because: (a) it is falsifiable and the pilot already shows th
 - **Decisions:** drop the coupling-monotonicity headline; adopt the C+revised-A+B framing; keep the fallback to a Datasets & Benchmarks submission.
 - **What I need from you:** approve the pivot (measurement + query-aware canonicalization, not storage↔token coupling), and confirm the fallback (benchmark-track) is acceptable if the theorem resists.
 - **Recommended next step (Phase 3/4):** write `research_gap.md` → `research_proposal.md` formalizing revised-A's ρ-utility theorem statement and the metric definitions, then a **second, less-synthetic pilot on real LoCoMo data** to measure actual duplication in one SOTA system (turns the kill-criterion into evidence) before committing to full implementation.
+
+---
+
+## Addendum — Phase 3 empirical resolution (2026-07-22)
+
+The method half was tested end-to-end on LoCoMo (local qwen3:8b + nomic-embed, LLM-judged). Results in [`phase3_pilot_results.md`](phase3_pilot_results.md).
+
+**Resolved verdict:**
+- ✅ **Measurement contribution stands.** Semantic memory duplication is real (~10% at τ=0.85 in LoCoMo observations; up to ~62% in a naive LLM-built store), pervasive, invisible to lexical methods, and unmeasured by any of the 14 surveyed systems. Metrics MDR/RTF are new to this setting.
+- ✅ **Necessity/harm result stands.** Blind semantic dedup is Pareto-dominated at every budget (multi-hop k=8: 0.15 vs full 0.37). "You cannot compact a memory store by blind semantic merging."
+- ❌ **Query-aware method does NOT hold.** MMR composition ≈ full retrieval on multi-hop at n=282 (McNemar p=0.90 @k8, 0.49 @k12). Safe, not beneficial. No top-tier method result.
+
+**Realistic paper targets (honest):**
+1. **Measurement + negative-result / analysis paper** (recommended). "Duplication in LLM agent memory: pervasive, and neither blind dedup (harmful) nor redundancy-aware composition (no benefit) fixes it." Fits NeurIPS Datasets & Benchmarks or an empirical-analysis / "lessons" track. Real, defensible, reproducible — but not a top-tier *method* main-track paper.
+2. **Pivot the research question** if a top-tier *method* is the hard requirement — e.g. away from dedup/redundancy (empirically a dead end here) toward a different memory bottleneck this evidence exposes (retrieval precision and answer reformulation dominate the error budget far more than redundancy does).
+
+**What this evidence does NOT support:** any paper claiming dedup / canonicalization / redundancy-aware composition improves agent-memory task performance. The data says otherwise.

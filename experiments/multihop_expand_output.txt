@@ -1,0 +1,11 @@
+==================================================================
+MULTI-HOP (LoCoMo cat 1) statistical test, n=282 questions, qwen3:8b judge
+==================================================================
+policy       k= 8     k=12     
+full          0.365     0.411    
+naive_dedup   0.152     0.163    
+query_aware   0.358     0.433    
+
+Paired McNemar test  query_aware vs full  (b=qa-only-correct, c=full-only-correct):
+  k=8: b=31 c=33  p=0.901  not significant (favouring full)
+  k=12: b=29 c=23  p=0.488  not significant (favouring query_aware)
