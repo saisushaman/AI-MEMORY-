@@ -1,0 +1,15 @@
+============================================================
+BOTTLENECK DIAGNOSTIC (LoCoMo, qwen3:8b judge, n per arm below)
+============================================================
+arm              acc     n
+oracle         0.610   200
+full_conv      0.630   200
+
+(compare vs earlier RETRIEVED full@k12 overall 0.400 / multihop 0.411)
+
+arm             cat1    cat2    cat3    cat4
+oracle         0.721   0.156   0.368   0.828
+full_conv      0.628   0.244   0.421   0.860
+
+Read: oracle high + retrieved low => RETRIEVAL is the bottleneck (method headroom).
+      oracle low too => reasoning/reformulation bottleneck (retrieval won't fix it).
