@@ -1,0 +1,18 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+We presented a controlled, fully reproducible anatomy of failure in a small,
+local long-term conversational-memory pipeline. Redundancy in an LLM-built store
+is real and semantic ($\sim\!62\%$ near-duplicates at $\tau{=}0.85$, invisible
+to lexical matching), yet deduplication does not help: blind merging is
+Pareto-dominated at every budget and redundancy-aware composition is
+statistically indistinguishable from top-$k$ on multi-hop ($n{=}282$,
+$p{=}0.90$). Using gold evidence as an oracle, we show the accuracy is lost to
+retrieval precision ($0.40\!\to\!0.61$) and, decisively, to reasoning: temporal
+questions remain near-floor ($0.156$) \emph{with perfect evidence}, and
+full-context retrieval distracts. Grounded extractive memory is meanwhile
+largely faithful. The practical message for small-model agent memory is an
+effort ordering---deduplication is not the lever, precision retrieval helps but
+is capped, and reasoning/grounding is the ceiling. Code, data, and all
+experiment scripts are released at
+\url{https://github.com/saisushaman/AI-MEMORY-}.

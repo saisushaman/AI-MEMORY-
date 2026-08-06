@@ -1,0 +1,58 @@
+% ============================================================
+% An Empirical Anatomy of Failure in Small-Model
+% Long-Term Conversational Memory
+%
+% Self-contained: compiles on Overleaf with pdflatex + bibtex,
+% no external style files. To submit to a specific venue, replace
+% \documentclass and the title block with that venue's style
+% (e.g. acl.sty / neurips_2026.sty) -- the \input sections are reusable.
+%
+% HONESTY POLICY: every number in this paper is a real measured value
+% from the accompanying code (github.com/saisushaman/AI-MEMORY-,
+% experiments/*.py). No result is fabricated. [PLACEHOLDER] marks any
+% value not yet measured; there should be none in the main results.
+% ============================================================
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{times}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\usepackage{authblk}
+
+\newcommand{\mdr}{\textsc{MDR}}
+\newcommand{\rtf}{\textsc{RTF}}
+
+\title{\bf An Empirical Anatomy of Failure in Small-Model\\ Long-Term Conversational Memory:\\ Redundancy, Retrieval, and Reasoning}
+
+\author{Sai Sushama}
+\affil{\normalsize (author affiliation)}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\input{sections/abstract}
+\end{abstract}
+
+\input{sections/introduction}
+\input{sections/related_work}
+\input{sections/setup}
+\input{sections/redundancy}
+\input{sections/dedup}
+\input{sections/bottleneck}
+\input{sections/faithfulness}
+\input{sections/discussion}
+\input{sections/limitations}
+\input{sections/conclusion}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

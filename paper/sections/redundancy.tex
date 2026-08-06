@@ -1,0 +1,63 @@
+\section{Redundancy is Real but Semantic}
+\label{sec:redundancy}
+
+We first ask whether an LLM-built memory store is actually redundant, and if so
+whether the redundancy is detectable lexically.
+
+\paragraph{Reference observation stream.} On LoCoMo's human-grounded
+per-session observation facts ($2{,}541$ facts), lexical near-duplicate detection
+(token Jaccard) finds essentially nothing: $\mdr \le 0.009$ across
+$\tau\in[0.6,1.0]$. Semantic detection with sentence embeddings tells a
+different story: $\mdr = 0.10$ at $\tau{=}0.85$, rising to $0.27$ at $0.80$ and
+$0.50$ at $0.75$ (Table~\ref{tab:redundancy}). Verified example pairs at
+$\tau{\ge}0.85$ are clear paraphrases (e.g.\ ``attended an LGBTQ+ pride parade
+last week'' vs.\ ``attended a pride parade recently'').
+
+\paragraph{Deployed LLM-built store.} The redundancy is far larger in the
+store an agent actually accumulates. Building the store with \texttt{qwen3:8b}
+extraction and measuring with \texttt{nomic-embed} cosine, a naive
+add-everything store has $\mdr = 0.62$ at $\tau{=}0.85$
+(Table~\ref{tab:store}). A Mem0-style similarity gate (skip a write if cosine to
+an existing memory $\ge 0.85$) removes $\sim\!44\%$ of facts on ingest
+($683\!\to\!384$ per conversation) and zeroes duplication \emph{at its own
+threshold} by construction---but a large near-duplicate band survives just below
+it ($\mdr = 0.64$ at $\tau{=}0.80$).
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lccccc}
+\toprule
+method / $\tau$ & 1.00 & 0.95 & 0.90 & 0.85 & 0.75 \\
+\midrule
+Lexical (Jaccard) & 0.000 & -- & -- & $\le$0.01 & 0.01 \\
+Semantic (MiniLM) & -- & 0.002 & 0.025 & \textbf{0.10} & 0.51 \\
+\bottomrule
+\end{tabular}
+\caption{Memory Duplication Ratio (\mdr) on LoCoMo observation facts.
+Lexical matching is blind to the semantic redundancy that embeddings expose.}
+\label{tab:redundancy}
+\end{table}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lccccc}
+\toprule
+policy / $\tau$ & 0.95 & 0.90 & 0.85 & 0.80 & 0.75 \\
+\midrule
+naive (683/conv) & 0.06 & 0.29 & \textbf{0.62} & 0.87 & 0.96 \\
+gated@0.85 (384/conv) & 0.00 & 0.00 & 0.00 & \textbf{0.64} & 0.92 \\
+\bottomrule
+\end{tabular}
+\caption{\mdr{} of a deployed \texttt{qwen3:8b}-built store (\texttt{nomic-embed}
+cosine). A similarity gate leaves a large near-duplicate band just below its
+threshold. Thresholds are embedder-specific and not comparable to
+Table~\ref{tab:redundancy}.}
+\label{tab:store}
+\end{table}
+
+\paragraph{Takeaway.} Redundancy in agent memory is real and substantial but
+\emph{semantic}: exact/lexical methods miss it, and a fixed similarity gate
+cannot cleanly separate ``duplicate'' from ``distinct.'' This sets up the
+natural question of whether removing it helps.

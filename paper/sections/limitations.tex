@@ -1,0 +1,28 @@
+\section{Limitations}
+\label{sec:limitations}
+
+This is a deliberately narrow, honest study and should be read as such.
+\begin{itemize}
+  \item \textbf{Single model, single dataset.} All results use
+  \texttt{qwen3:8b} (extraction, answering, and judging) with
+  \texttt{nomic-embed}/\texttt{MiniLM} on LoCoMo. Absolute numbers are not
+  competitive with frontier-model systems and are not meant to be; only the
+  \emph{relative, within-pipeline} comparisons are claimed. Whether the effect
+  ordering (dedup $<$ retrieval $<$ reasoning) holds for larger models or on
+  LongMemEval~\cite{wu2024longmemeval} is untested.
+  \item \textbf{LLM-as-judge.} Scoring uses the same model family as generation;
+  self-preference bias is possible. We mitigate by comparing arms under an
+  identical judge, but a human-validated subset is future work.
+  \item \textbf{Metric thresholds.} \mdr/\rtf{} are threshold- and
+  embedder-dependent; we report curves rather than single numbers, and do not
+  compare absolute \mdr{} across embedders.
+  \item \textbf{Deduplication scope.} We test one blind-merge threshold and one
+  redundancy-aware composer (MMR). A learned or store-level query-distribution
+  method could differ, though our composition-level negative gives little reason
+  to expect a large gain.
+  \item \textbf{Faithfulness probe.} The $0/120$ result is a single-judge,
+  single-extractor, conservative-parse probe; it bounds the effect as small in
+  \emph{this} grounded setup, not in generative or tool-use memory.
+  \item \textbf{No new method.} We claim a diagnosis, not a system that improves
+  the state of the art.
+\end{itemize}

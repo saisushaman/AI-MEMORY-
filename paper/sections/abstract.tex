@@ -1,0 +1,27 @@
+Long-term memory for large language model (LLM) agents is usually studied one
+mechanism at a time---deduplication, retrieval, or consolidation---and almost
+always with large frontier models. We instead present a controlled empirical
+\emph{anatomy} of where a small, fully local agent-memory pipeline
+(\texttt{qwen3:8b} extraction and answering, \texttt{nomic-embed} retrieval)
+loses accuracy on the LoCoMo long-term conversational-memory benchmark, judged
+by an LLM rater. Three findings emerge. \textbf{(1) Redundancy is real but
+semantic, not lexical:} an LLM-built memory store contains up to $62\%$
+near-duplicate facts at a cosine threshold of $0.85$, essentially invisible to
+exact/lexical matching ($\approx\!0\%$). \textbf{(2) Deduplication does not
+help and often hurts:} blindly merging near-duplicates is Pareto-dominated at
+every retrieval budget (e.g.\ $0.15$ vs.\ $0.37$ judged accuracy on multi-hop),
+and redundancy-aware composition (maximal marginal relevance) is
+\emph{statistically indistinguishable} from plain top-$k$ retrieval on multi-hop
+questions ($n{=}282$, McNemar $p{=}0.90$ at $k{=}8$). \textbf{(3) The dominant
+error source is retrieval precision and reasoning, not redundancy:} with the
+benchmark's \emph{gold evidence} in context, accuracy jumps from $0.40$
+(retrieval) to $0.61$ (oracle), yet temporal questions remain near-floor
+($0.156$) \emph{even with perfect evidence}, and supplying the entire
+conversation \emph{underperforms} precise evidence on multi-hop
+($0.628$ vs.\ $0.721$). We also observe that grounded extractive memory is
+largely faithful ($0/120$ sampled facts unsupported), unlike open-ended
+generation. Our contribution is not a new method---the space is
+saturated---but a reproducible, honest decomposition that reorders where effort
+should go: away from deduplication, toward precision retrieval and, above all,
+reasoning/grounding that no amount of retrieval can supply. Code and data:
+\url{https://github.com/saisushaman/AI-MEMORY-}.

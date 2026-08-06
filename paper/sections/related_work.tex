@@ -1,0 +1,41 @@
+\section{Related Work}
+
+\paragraph{Agent memory systems.} MemGPT~\cite{packer2023memgpt} frames memory as
+OS-style paging; Mem0~\cite{chhikara2025mem0} extracts and consolidates salient
+facts; A-MEM~\cite{xu2025amem} maintains linked structured notes;
+Zep~\cite{rasmussen2025zep} uses a temporal knowledge graph; MIRIX~\cite{wang2025mirix}
+uses multiple typed memories. These target end-to-end quality; we instead hold a
+minimal pipeline fixed and decompose its error.
+
+\paragraph{Deduplication and redundancy.} SemDeDup~\cite{abbas2023semdedup}
+removes semantic near-duplicates from \emph{training data};
+AdaGReS~\cite{peng2025adagres} performs token-budgeted, redundancy-aware context
+selection over RAG chunks with submodular guarantees. We ask whether such
+redundancy handling helps an \emph{agent memory} pipeline and find, on our setup,
+that it does not.
+
+\paragraph{Precision retrieval and context distraction.} A large body of work
+shows that irrelevant or excess context hurts: ``lost in the
+middle''~\cite{liu2023lost}, the harm of plausible
+distractors~\cite{cuconasu2024power}, sufficiency over
+volume~\cite{joren2025sufficient}, and compression to precise
+evidence~\cite{xu2024recomp}. Multi-hop retrieval over static corpora is mature (e.g.\ interleaving retrieval
+with reasoning~\cite{trivedi2023ircot}, and graph-based associative
+retrieval~\cite{gutierrez2024hipporag}). For conversational memory specifically,
+EviMem~\cite{li2026evimem} and MRAgent~\cite{ji2026mragent} perform iterative,
+evidence-gap-driven or reasoning-in-the-loop multi-hop retrieval. Our oracle
+analysis quantifies \emph{how much} precision headroom exists in a small-model
+pipeline and, crucially, where it runs out.
+
+\paragraph{Memory faithfulness and hallucination.}
+HaluMem~\cite{chen2025halumem} benchmarks operation-level hallucination in agent
+memory; atomic-fact checking is mature (e.g.\
+FActScore~\cite{min2023factscore}), and hallucinations are known to
+snowball~\cite{zhang2023snowball}. We contribute a small observation: grounded
+\emph{extractive} memory writes are largely faithful, unlike open-ended
+generation, so hallucinated-memory accumulation is a weak effect in this setup.
+
+\paragraph{Evaluation.} We use LoCoMo~\cite{maharana2024locomo} and adopt
+LLM-as-judge scoring, consistent with
+MemoryAgentBench~\cite{hu2025memoryagentbench} and the difficulty of string-match
+metrics on reformulated answers (\S\ref{sec:setup}).

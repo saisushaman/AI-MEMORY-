@@ -1,0 +1,48 @@
+\section{Introduction}
+
+LLM agents increasingly maintain a persistent memory: salient facts are
+extracted from conversations, stored, and later retrieved to answer questions
+that span many sessions~\cite{packer2023memgpt,chhikara2025mem0,xu2025amem}.
+Progress is typically reported one mechanism at a time---better
+consolidation, deduplication, graph structure, or retrieval---and almost
+exclusively with large frontier models on benchmarks such as
+LoCoMo~\cite{maharana2024locomo} and LongMemEval~\cite{wu2024longmemeval}.
+
+This leaves a practical question unanswered: for a \emph{small, locally
+runnable} agent-memory stack, \emph{where does the accuracy actually go}? Which
+of the many proposed levers---removing redundant memories, retrieving more
+precisely, or reasoning better over what is retrieved---would move the needle,
+and which are dead ends? Answering this requires holding the pipeline fixed and
+decomposing its error, rather than proposing yet another mechanism.
+
+We do exactly that. Using a single small open model (\texttt{qwen3:8b}) for both
+extraction and answering, a local embedding model (\texttt{nomic-embed}) for
+retrieval, and an LLM judge for scoring, we run a controlled study on LoCoMo and
+measure the effect of (i) redundancy in the store, (ii) deduplication and
+redundancy-aware composition, and (iii) retrieval precision versus reasoning,
+using the benchmark's gold evidence as an oracle ceiling.
+
+\paragraph{Contributions.} We make no methodological claim; recent work already
+covers deduplication~\cite{abbas2023semdedup,peng2025adagres}, precision
+retrieval over conversational memory~\cite{li2026evimem,ji2026mragent}, and
+memory hallucination~\cite{chen2025halumem}. Our contribution is an honest,
+reproducible \emph{diagnosis}:
+\begin{enumerate}
+  \item A redundancy measurement (\mdr/\rtf, \S\ref{sec:redundancy}) showing an
+  LLM-built store is $\sim\!62\%$ semantically duplicated at $\tau{=}0.85$ yet
+  $\approx\!0\%$ lexically---so redundancy is real but requires semantic
+  detection.
+  \item A negative result (\S\ref{sec:dedup}): blind deduplication is
+  Pareto-dominated at every budget, and redundancy-aware composition gives no
+  statistically significant gain over top-$k$ on multi-hop ($n{=}282$).
+  \item A bottleneck decomposition (\S\ref{sec:bottleneck}): retrieval precision
+  leaves $\sim\!21$ accuracy points on the table, but temporal reasoning is a
+  hard floor even with gold evidence, and full-context retrieval \emph{distracts}
+  on multi-hop.
+  \item A faithfulness observation (\S\ref{sec:faithfulness}): grounded
+  extractive memory is largely faithful, contrasting open-ended
+  generation~\cite{min2023factscore}.
+\end{enumerate}
+Together these reorder priorities for small-model agent memory: deduplication is
+not the lever; precision retrieval helps but is capped; reasoning/grounding is
+the ceiling.

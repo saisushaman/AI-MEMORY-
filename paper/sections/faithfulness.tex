@@ -1,0 +1,25 @@
+\section{Grounded Extractive Memory is Largely Faithful}
+\label{sec:faithfulness}
+
+A natural worry is that the LLM extractor writes \emph{hallucinated} facts into
+memory that later corrupt answers---a concern formalized for open-ended
+generation~\cite{min2023factscore,zhang2023snowball} and, for memory systems,
+benchmarked by HaluMem~\cite{chen2025halumem}. We probe whether this is a strong
+effect in our grounded setup.
+
+For a sample of extracted facts we ask an LLM judge whether each fact is fully
+supported by (stated or unambiguously entailed by) the source session it was
+extracted from. In a $120$-fact sample, $0$ were judged unsupported
+($\approx\!0\%$). The extractor over-\emph{produces} facts (it inflates the store
+and creates the redundancy of \S\ref{sec:redundancy}) but does not
+\emph{fabricate}: because it summarizes a provided transcript rather than
+generating from parametric memory, it stays close to the source. This contrasts
+with the $\sim\!42\%$ unsupported atomic facts reported for open-ended
+biography generation~\cite{min2023factscore}.
+
+\paragraph{Takeaway.} For grounded, extractive memory writes, hallucinated-memory
+accumulation is a weak effect; the store's problem is \emph{quantity/redundancy}
+and downstream \emph{retrieval/reasoning}, not fabrication. (This is a limited
+probe---single extractor, single judge, one dataset, conservative
+parse-handling---and is not a claim about generative or tool-use memory, where
+HaluMem shows hallucination does accumulate.)

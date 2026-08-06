@@ -1,0 +1,34 @@
+\section{Discussion}
+\label{sec:discussion}
+
+Our results give a consistent, if deflationary, picture for small-model
+long-term conversational memory.
+
+\paragraph{Redundancy is a red herring for accuracy.} It is real and large
+(\S\ref{sec:redundancy}), and it is tempting to optimize---but neither removing
+it (harmful) nor composing around it (inert) improves answers
+(\S\ref{sec:dedup}). Deduplication may still matter for \emph{cost} (a similarity
+gate halves the store), but not for quality in this regime. This complements,
+rather than contradicts, redundancy-aware selection results on static-corpus
+RAG~\cite{peng2025adagres}: the setting and objective differ.
+
+\paragraph{Precision retrieval is the actionable lever, with a known cap.} The
+$0.40\!\to\!0.61$ oracle gap (\S\ref{sec:bottleneck}) is exactly the headroom
+that iterative, gap-driven conversational-memory
+retrievers~\cite{li2026evimem,ji2026mragent} exploit. Our contribution here is to
+\emph{quantify the cap}: full-context distraction and, decisively, a temporal
+reasoning floor that no retriever crosses.
+
+\paragraph{The temporal floor is the interesting residual.} That the oracle
+scores $0.156$ on temporal questions---with gold evidence and dates in
+context---isolates a reasoning/grounding failure (relative-to-absolute date
+resolution) that is orthogonal to memory mechanisms. For small models this,
+not redundancy or retrieval, is where accuracy is truly lost.
+
+\paragraph{Why we report a diagnosis, not a method.} Each first-principles
+mechanism we considered---semantic deduplication, precision multi-hop retrieval
+over conversational memory, and hallucinated-memory mitigation---is already
+covered by very recent work~\cite{peng2025adagres,li2026evimem,ji2026mragent,chen2025halumem}.
+The subfield is moving quickly; the durable value we can add is a controlled,
+reproducible decomposition that tells practitioners which lever to pull for a
+small local stack.
