@@ -1,0 +1,10 @@
+================================================================
+EXTRACTOR FAITHFULNESS (LoCoMo store built by qwen3:8b; qwen3 judge)
+================================================================
+facts checked: 400
+unsupported (hallucinated) : 1  = 0.2%
+supported                  : 399  = 99.8%
+
+Example UNSUPPORTED extracted 'memories':
+  - James is planning a gaming night with his siblings next month.
+
