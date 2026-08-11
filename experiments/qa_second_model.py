@@ -11,7 +11,9 @@ import numpy as np
 import importlib.util
 spec=importlib.util.spec_from_file_location("qd","experiments/qa_dedup_eval.py")
 qd=importlib.util.module_from_spec(spec); spec.loader.exec_module(qd)
-CACHE=qd.CACHE; ANSWERER="llama3.2:3b"; KS=[8,12]; POLS=["full","naive_dedup","query_aware"]
+CACHE=qd.CACHE; ANSWERER="llama3.2:3b"; POLS=["full","naive_dedup","query_aware"]
+KS=[int(x) for x in os.environ.get("KS","8").split(",")]   # single budget by default (tractable)
+WORKCAP=int(os.environ.get("WORKCAP","360"))               # cap for a completable run
 
 def _post_retry(path,body,timeout,tries=5):
     last=None
@@ -47,7 +49,8 @@ def main():
     jud=json.load(open(jf,encoding="utf-8")) if os.path.exists(jf) else {}
     rng=random.Random(qd.SEED)
     from collections import defaultdict
-    agg=defaultdict(lambda:[0,0]); t0=time.time(); done=0
+    # Build the full work list (deterministic), decoupled into two single-model phases
+    work=[]  # (akey, gold, ctx)
     for ci,sample in enumerate(data):
         facts=qd.conv_store(ex[ci])
         E=np.asarray([embmap[f] for f in facts],dtype=np.float32); E/=np.linalg.norm(E,axis=1,keepdims=True)+1e-9
@@ -64,15 +67,29 @@ def main():
                     elif pol=="naive_dedup": sel=qd.topk_by_relevance(qv,E,dd,k)
                     else: sel=qd.mmr(qv,E,full_idx,k,qd.LAMBDA)
                     ctx="\n".join(f"- {facts[i]}" for i in sel)
-                    akey=f"{ci}|{question}|{pol}|{k}"
-                    if akey not in ans: ans[akey]=answer2(ctx,question); done+=1
-                    if akey not in jud: jud[akey]=judge_qwen(question,gold,ans[akey])
-                    if done and done%80==0:
-                        json.dump(ans,open(af,"w",encoding="utf-8")); json.dump(jud,open(jf,"w",encoding="utf-8"))
-                        print(f"  {done} answered t={time.time()-t0:.0f}s",flush=True)
-                    agg[(pol,k)][0]+=1 if jud[akey] else 0; agg[(pol,k)][1]+=1
-        print(f"conv {ci+1}/10 t={time.time()-t0:.0f}s",flush=True)
-    json.dump(ans,open(af,"w",encoding="utf-8")); json.dump(jud,open(jf,"w",encoding="utf-8"))
+                    work.append((f"{ci}|{question}|{pol}|{k}",gold,ctx,question))
+    work=work[:WORKCAP]
+
+    # PHASE 1: all llama3.2 answers (single model loaded)
+    t0=time.time(); done=0
+    for akey,gold,ctx,question in work:
+        if akey not in ans:
+            ans[akey]=answer2(ctx,question); done+=1
+            if done%50==0:
+                json.dump(ans,open(af,"w",encoding="utf-8")); print(f"  [ans] {done} t={time.time()-t0:.0f}s",flush=True)
+    json.dump(ans,open(af,"w",encoding="utf-8"))
+    # PHASE 2: all qwen3 judgments (single model loaded)
+    done=0
+    for akey,gold,ctx,question in work:
+        if akey not in jud:
+            jud[akey]=judge_qwen(question,gold,ans[akey]); done+=1
+            if done%50==0:
+                json.dump(jud,open(jf,"w",encoding="utf-8")); print(f"  [judge] {done} t={time.time()-t0:.0f}s",flush=True)
+    json.dump(jud,open(jf,"w",encoding="utf-8"))
+    agg=defaultdict(lambda:[0,0])
+    for akey,gold,ctx,question in work:
+        parts=akey.split("|"); pol=parts[-2]; k=int(parts[-1])
+        agg[(pol,k)][0]+=1 if jud.get(akey) else 0; agg[(pol,k)][1]+=1
     print("\n"+"="*60)
     print(f"SECOND ANSWERER = {ANSWERER} (judge=qwen3:8b, LoCoMo cats1-4, n=200)")
     print("="*60)

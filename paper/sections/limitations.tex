@@ -3,13 +3,14 @@
 
 This is a deliberately narrow, honest study and should be read as such.
 \begin{itemize}
-  \item \textbf{Single model, single dataset.} All results use
-  \texttt{qwen3:8b} (extraction, answering, and judging) with
-  \texttt{nomic-embed}/\texttt{MiniLM} on LoCoMo. Absolute numbers are not
-  competitive with frontier-model systems and are not meant to be; only the
-  \emph{relative, within-pipeline} comparisons are claimed. Whether the effect
-  ordering (dedup $<$ retrieval $<$ reasoning) holds for larger models or on
-  LongMemEval~\cite{wu2024longmemeval} is untested.
+  \item \textbf{Scale of models and data.} The main study uses \texttt{qwen3:8b}
+  with \texttt{nomic-embed}/\texttt{MiniLM} on LoCoMo. \S\ref{sec:generality}
+  extends the two load-bearing findings to a second judge (\texttt{llama3.2:3b}),
+  a second answerer (\texttt{llama3.2:3b}), and a second dataset
+  (LongMemEval~\cite{wu2024longmemeval}), but all models are small and local;
+  whether the conclusions hold for frontier models is untested. Absolute numbers
+  are not competitive with frontier systems and are not meant to be---only the
+  \emph{relative, within-pipeline} comparisons are claimed.
   \item \textbf{LLM-as-judge.} Scoring uses the same model family as generation;
   self-preference bias is possible. We mitigate by comparing arms under an
   identical judge, but a human-validated subset is future work.

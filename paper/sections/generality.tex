@@ -56,4 +56,15 @@ reasoning (right, red) is lowest despite gold evidence.}
 \label{fig:lme}
 \end{figure}
 
-% [SECOND-ANSWERER PARAGRAPH inserted here once the llama3.2-answerer run completes]
+\paragraph{A second answerer model.} Finally we replace the answering model with
+\texttt{llama3.2:3b} (retrieval and the qwen3-built store held fixed; judge held
+fixed as \texttt{qwen3:8b}), at $k{=}8$ on $n{=}120$ questions per policy. The
+ordering again replicates: naive-dedup is dominated ($0.192$ vs.\ full $0.342$)
+and query-aware $\approx$ full ($0.333$). Finding (i) survives a change of the
+generation model as well as the judge.
+
+\paragraph{Summary.} The two load-bearing findings are robust to the axes we
+could vary locally: deduplication fails to help under two judges and two
+answerer models, and the temporal-reasoning floor appears under two datasets.
+Absolute accuracies shift with model and judge; the qualitative conclusions do
+not.

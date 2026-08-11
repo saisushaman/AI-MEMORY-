@@ -20,7 +20,10 @@ benchmark's \emph{gold evidence} in context, accuracy jumps from $0.40$
 conversation \emph{underperforms} precise evidence on multi-hop
 ($0.628$ vs.\ $0.721$). We also observe that grounded extractive memory is
 largely faithful ($1/400$, $0.2\%$, sampled facts unsupported), unlike open-ended
-generation. Our contribution is not a new method---the space is
+generation. These findings are robust: the deduplication result holds under a
+second judge and a second answerer model, and the temporal-reasoning floor
+replicates on a second dataset (LongMemEval). Our contribution is not a new
+method---the space is
 saturated---but a reproducible, honest decomposition that reorders where effort
 should go: away from deduplication, toward precision retrieval and, above all,
 reasoning/grounding that no amount of retrieval can supply. Code and data:
