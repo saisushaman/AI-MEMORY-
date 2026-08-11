@@ -32,6 +32,15 @@ arithmetic (e.g.\ ``yesterday'' relative to the session date). No retriever can
 fix this---it is a reasoning/grounding limit, and it caps how much precision
 retrieval alone can deliver.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_oracle.png}
+\caption{Bottleneck decomposition ($n{=}200$). Oracle (gold evidence) far
+exceeds retrieval, but temporal stays near-floor even with perfect evidence,
+and full-context underperforms the oracle on multi-hop.}
+\label{fig:oracle}
+\end{figure}
+
 \begin{table}[t]
 \centering
 \small

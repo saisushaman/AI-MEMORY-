@@ -27,6 +27,15 @@ $282$ multi-hop (category 1) questions at $k\in\{8,12\}$ with a paired McNemar
 test (Table~\ref{tab:multihop}). The difference between query-aware and full is
 \emph{not significant}: $p{=}0.90$ at $k{=}8$ and $p{=}0.49$ at $k{=}12$.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_budget_sweep.png}
+\caption{LLM-judged accuracy vs.\ retrieval budget. Naive deduplication is
+dominated at every budget; redundancy-aware composition never exceeds plain
+top-$k$.}
+\label{fig:sweep}
+\end{figure}
+
 \begin{table}[t]
 \centering
 \small

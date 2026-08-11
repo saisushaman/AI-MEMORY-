@@ -23,6 +23,16 @@ an existing memory $\ge 0.85$) removes $\sim\!44\%$ of facts on ingest
 threshold} by construction---but a large near-duplicate band survives just below
 it ($\mdr = 0.64$ at $\tau{=}0.80$).
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_redundancy.png}
+\caption{Semantic near-duplicate rate (\mdr) of the deployed \texttt{qwen3:8b}
+store vs.\ threshold $\tau$. Lexical matching (dotted) is blind to the
+redundancy embeddings expose; a similarity gate leaves a band just below its
+threshold.}
+\label{fig:redundancy}
+\end{figure}
+
 \begin{table}[t]
 \centering
 \small
