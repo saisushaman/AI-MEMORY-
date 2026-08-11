@@ -1,0 +1,14 @@
+LongMemEval (oracle split) -- ORACLE-answering accuracy by question type
+qwen3:8b answerer + judge; gold evidence sessions in context
+================================================================
+question_type                    acc     n
+OVERALL                        0.583   230
+knowledge-update               0.600    40
+multi-session                  0.375    40
+single-session-assistant       0.950    40
+single-session-preference      0.467    30
+single-session-user            0.800    40
+temporal-reasoning             0.275    40
+
+Read: does temporal-reasoning sit BELOW other types even with gold
+evidence? -> replicates the LoCoMo temporal-floor finding on a 2nd dataset.

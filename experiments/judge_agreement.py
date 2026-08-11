@@ -39,7 +39,9 @@ def main():
         for q in s["qa"]:
             if q.get("answer"): meta[(ci,q["question"])]=str(q["answer"])
 
-    keys=[k for k in ans if k in j1]   # only judge what qwen3 already judged (aligned set)
+    CAP=int(os.environ.get("CAP","600"))  # cap for a fast, completable robustness sample
+    keys=sorted(k for k in ans if k in j1)[:CAP]   # aligned set, deterministic order
+    print(f"judging {len(keys)} answers with {JUDGE2} ...",flush=True)
     t0=time.time(); done=0
     for key in keys:
         if key in j2: continue
@@ -47,7 +49,7 @@ def main():
         gold=meta.get((ci,question))
         if gold is None: continue
         j2[key]=judge2(question,gold,ans[key]); done+=1
-        if done%100==0:
+        if done%25==0:
             json.dump(j2,open(j2f,"w",encoding="utf-8")); print(f"  judged {done} t={time.time()-t0:.0f}s",flush=True)
     json.dump(j2,open(j2f,"w",encoding="utf-8"))
 

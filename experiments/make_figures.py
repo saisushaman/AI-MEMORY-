@@ -56,4 +56,17 @@ plt.title("Redundancy is semantic, invisible to lexical matching")
 plt.legend(fontsize=9); plt.grid(alpha=0.3); plt.tight_layout()
 plt.savefig(f"{OUT}/fig_redundancy.png"); plt.close()
 
+# ---- Fig 4: LongMemEval oracle accuracy by question type ---------------------
+types = ["single-sess\nassistant", "single-sess\nuser", "knowledge\nupdate",
+         "single-sess\npreference", "multi-\nsession", "temporal\nreasoning"]
+acc = [0.950, 0.800, 0.600, 0.467, 0.375, 0.275]
+colors = ["#4C72B0"]*4 + ["#DD8452", "#C44E52"]
+plt.figure(figsize=(6.2, 3.4))
+plt.bar(range(len(types)), acc, color=colors)
+plt.xticks(range(len(types)), types, fontsize=8)
+plt.ylabel("oracle accuracy (gold evidence)")
+plt.title("LongMemEval: temporal reasoning is the floor, even with gold evidence")
+plt.grid(axis="y", alpha=0.3); plt.tight_layout()
+plt.savefig(f"{OUT}/fig_longmemeval.png"); plt.close()
+
 print("wrote:", os.listdir(OUT))
