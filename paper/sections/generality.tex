@@ -8,8 +8,8 @@ judge, a change of dataset, and a change of answerer.
 
 \paragraph{A second, independent judge.} We re-judge the cached answers with a
 different model, \texttt{llama3.2:3b} (vs.\ \texttt{qwen3:8b}). The two judges
-agree on $81.3\%$ of $600$ items (Cohen's $\kappa = 0.52$, moderate);
-\texttt{llama3.2} is stricter (positive rate $0.19$ vs.\ $0.31$). Crucially, the
+agree on $85.2\%$ of $3{,}834$ items (Cohen's $\kappa = 0.60$, moderate);
+\texttt{llama3.2} is stricter (positive rate $0.18$ vs.\ $0.30$). Crucially, the
 \emph{policy ordering is identical} under the second judge: naive-dedup remains
 dominated at every budget ($0.06$--$0.09$ vs.\ full $0.23$--$0.30$) and
 query-aware $\approx$ full. Finding (i) is judge-robust; only the absolute scale
