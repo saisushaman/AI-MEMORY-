@@ -58,9 +58,10 @@ reasoning (right, red) is lowest despite gold evidence.}
 
 \paragraph{A second answerer model.} Finally we replace the answering model with
 \texttt{llama3.2:3b} (retrieval and the qwen3-built store held fixed; judge held
-fixed as \texttt{qwen3:8b}), at $k{=}8$ on $n{=}120$ questions per policy. The
-ordering again replicates: naive-dedup is dominated ($0.192$ vs.\ full $0.342$)
-and query-aware $\approx$ full ($0.333$). Finding (i) survives a change of the
+fixed as \texttt{qwen3:8b}), on $n{=}200$ questions per policy at
+$k\in\{8,12\}$. The ordering again replicates: naive-dedup is dominated
+($0.155$ at both budgets vs.\ full $0.300$/$0.315$) and query-aware $\approx$
+full ($0.275$/$0.315$, equal at $k{=}12$). Finding (i) survives a change of the
 generation model as well as the judge.
 
 \paragraph{Summary.} The two load-bearing findings are robust to the axes we

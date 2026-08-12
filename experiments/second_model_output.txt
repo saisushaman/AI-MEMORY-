@@ -1,8 +1,8 @@
 SECOND ANSWERER = llama3.2:3b (judge=qwen3:8b, LoCoMo cats1-4, n=200)
 ============================================================
-policy       k= 8   
-full          0.342 
-naive_dedup   0.192 
-query_aware   0.333 
+policy       k= 8   k=12   
+full          0.300  0.315 
+naive_dedup   0.155  0.155 
+query_aware   0.275  0.315 
 
 (pattern check: naive_dedup dominated? query_aware ~ full?)
